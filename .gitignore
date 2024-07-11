@@ -71,3 +71,7 @@ node_modules/
 # firebase local
 emulator_data
 .firebaserc
+
+#python
+.venv
+__pycache__
