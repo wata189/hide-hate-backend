@@ -63,7 +63,7 @@ node_modules/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
+.env*
 
 # dataconnect generated files
 .dataconnect
@@ -76,4 +76,6 @@ emulator_data
 .venv
 __pycache__
 
+# 機械学習モデル
 data
+model
