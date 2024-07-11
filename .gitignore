@@ -79,3 +79,6 @@ __pycache__
 # 機械学習モデル
 data
 model
+
+#rest client拡張機能
+.http
