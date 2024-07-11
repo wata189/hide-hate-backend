@@ -75,3 +75,5 @@ emulator_data
 #python
 .venv
 __pycache__
+
+data
