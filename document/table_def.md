@@ -2,7 +2,6 @@
 |論理名         |物理名         |型       |PK |null可 |UK   |備考   |
 |ユーザID       |id             |string   |◯ |×     |◯   |       |
 |名前           |name           |string   |× |×     |×   |       |
-|アイコンパス   |icon_path      |string   |× |◯     |◯   |       |
 |メールアドレス |email          |string   |× |×     |◯   |       |
 |パスワード     |hashed_password|string   |× |×     |×   |       |
 |作成日時       |create_at      |timestamp|× |×     |×   |       |
