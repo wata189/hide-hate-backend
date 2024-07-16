@@ -1,6 +1,7 @@
 import contextlib
 from agraffe import Agraffe
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import pickle
 import firebase_admin
@@ -20,9 +21,13 @@ app = FastAPI(lifespan=lifespan)
 ENV = os.environ.get("ENV")
 CLIENT_URL  = os.environ.get("CLIENT_URL")
 # CORSの設定
-RESPONSE_HEADERS = {
-  "Access-Control-Allow-Origin": CLIENT_URL
-}
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=[CLIENT_URL],
+  allow_credentials=False,
+  allow_methods=["*"],
+  allow_headers=["*"],
+)
 
 if (not len(firebase_admin._apps)):
   firebase_admin.initialize_app()
@@ -35,6 +40,10 @@ if (not len(firebase_admin._apps)):
 def fetch():
   timelines:list[Timeline] = run_transaction([fetch_timeline])
   return {"timelines": timelines}
+
+@app.post("/create")
+def create():
+  return {}
 
 
 ################################## Model ###############################################
