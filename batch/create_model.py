@@ -68,6 +68,6 @@ print("正解率:" + str(accuracy_score(df_tweet[objectiv_col], model.predict(tw
 print("AUC:" + str(roc_auc_score(df_tweet[objectiv_col], model.predict_proba(tweet_vectors)[:, 1])))
 
 # モデルを保存
-file_name = str(round(time.time())) + "_nn_model"
+file_name = str(round(time.time())) + "_nn_model.pkl"
 with open(os.path.join("model", file_name), mode='wb') as f:
   pickle.dump(model, f, protocol=2)

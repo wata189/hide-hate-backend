@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "-------↓開発環境----": "",
-    "ローカルWebサーバ": "npx env-cmd -f .env.dev functions-framework --target main --debug",
+    "ローカルWebサーバ": "npx env-cmd -f .env.dev functions-framework --target entry_point --debug",
     "ローカルfirebase": "firebase emulators:start --import=emulator_data --export-on-exit",
     "-------↓バッチ----": "",
     "ローカルモデル作成": "npx env-cmd -f batch/.env.batch.dev python batch/create_model.py"
