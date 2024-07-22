@@ -1,14 +1,15 @@
 import contextlib
 from agraffe import Agraffe
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 import os
 import pickle
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore, storage
+from firebase_admin import firestore, storage, auth
 from typing import Callable, Union
 from dataclasses import dataclass
+from pydantic import BaseModel
 
 ##################################設定###############################################
 @contextlib.asynccontextmanager
@@ -33,6 +34,31 @@ if (not len(firebase_admin._apps)):
   firebase_admin.initialize_app()
 
 
+############################################# auth    util #################################################
+
+class JWTBearer(HTTPBearer):
+  def __init__(self, auto_error: bool = True):
+    super(JWTBearer, self).__init__(auto_error=auto_error)
+
+  async def __call__(self, request: Request):
+    credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+    if not credentials.scheme == "Bearer":
+      raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
+    if not self.verify_jwt(credentials.credentials):
+      raise HTTPException(status_code=403, detail="Invalid token or expired token.")
+    return credentials.credentials
+
+  def verify_jwt(self, jwtoken: str) -> bool:
+    isTokenValid: bool = False
+    try:
+      payload = auth.verify_id_token(jwtoken)
+      print(payload)
+    except:
+      payload = None
+    if payload:
+      isTokenValid = True
+
+    return isTokenValid
 
 
 ##################################ルーティング###############################################
@@ -41,9 +67,28 @@ def fetch():
   timelines:list[Timeline] = run_transaction([fetch_timeline])
   return {"timelines": timelines}
 
-@app.post("/create")
-def create():
-  return {}
+@dataclass
+class UserResponse:
+  id: str
+  email: str
+  name: str
+
+@app.get("/user/get", dependencies=[Depends(JWTBearer())])
+def get_user(request: Request):
+  user: UserResponse = run_transaction([lambda t: get_authenticated_user(t, request)])
+  return {
+    "user": user
+  }
+
+
+class CreateParams(BaseModel):
+  user_id: str
+  content: str
+  accept_may_hate: bool
+@app.post("/create", dependencies=[Depends(JWTBearer())])
+def create(params: CreateParams):
+  timelines:list[Timeline] = run_transaction([fetch_timeline])
+  return {"timelines": timelines}
 
 
 ################################## Model ###############################################
@@ -109,6 +154,25 @@ def fetch_user(transaction: firestore.firestore.Transaction):
   users:list[User] = select_firestore(transaction, "m_user")
   
   return users
+
+def get_authenticated_user(transaction: firestore.firestore.Transaction, request:Request) -> UserResponse:
+  authorization = request.headers.get("Authorization")
+  if authorization:
+    jwt = authorization.split(" ")[1]
+    decoded_token = auth.verify_id_token(jwt)
+    email = decoded_token["email"]
+    user_collection:list[User] = select_firestore(transaction, "m_user", "email", "==", email)
+    if len(user_collection) == 1:
+      user_doc = user_collection[0]
+      return {
+        "id": user_doc["id"],
+        "email": email,
+        "name": user_doc["name"]
+      }
+    else:
+      raise HTTPException(status_code=403, detail="User not found.")
+  else:
+    raise HTTPException(status_code=403, detail="Authorization header not found.")
 
 
 
@@ -198,6 +262,8 @@ class Firestore_Dict:
   create_user_id: str
   update_at: int
   update_user_id: str
+
+
 
 ############################################# Storage util #################################################
 # 開発環境ではない場合はGCPに接続
