@@ -1,10 +1,12 @@
+from typing import Union
 import pandas
 from janome.tokenizer import Tokenizer
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import roc_auc_score, accuracy_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
-import pickle
+import joblib
+from modules import ai_util
 
 import time
 import os
@@ -40,19 +42,27 @@ df_tweet[explanatory_col] = df_tweet[explanatory_col].apply(clean_text)
 # トークナイザーの設定
 all_texts = list(df_hate_train["text"])
 all_texts.extend(list(df_hate_test["text"]))
-tokenizer = Tokenizer()
 
 # ベクトライザーの設定
-vectorizer = CountVectorizer(tokenizer=lambda text: tokenizer.tokenize(text, wakati=True))
+vectorizer = CountVectorizer(tokenizer=ai_util.tokenize, token_pattern=None)
 vectorizer.fit(all_texts)
+
+# いったんベクトライザー保存して再度読み込み
+tmp = str(round(time.time()))
+vectorizer_file_name = tmp + "_vectorizer.pkl"
+with open(os.path.join("model", vectorizer_file_name), mode='wb') as f:
+  joblib.dump(vectorizer, f, protocol=2)
+
+loaded_vectorizer = joblib.load(os.path.join("model", vectorizer_file_name))
+
 
 # テストデータを分割
 train_x, train_y, val_x, val_y = split_data_frame(df_hate_train, objectiv_col)
 
 # テキストをベクトル化
-train_vectors = vectorizer.transform(train_x[explanatory_col])
-val_vectors = vectorizer.transform(val_x[explanatory_col])
-tweet_vectors = vectorizer.transform(df_tweet[explanatory_col])
+train_vectors = loaded_vectorizer.transform(train_x[explanatory_col])
+val_vectors = loaded_vectorizer.transform(val_x[explanatory_col])
+tweet_vectors = loaded_vectorizer.transform(df_tweet[explanatory_col])
 
 #モデル作成
 model = MLPClassifier(hidden_layer_sizes=(16,), random_state=42)
@@ -68,6 +78,6 @@ print("正解率:" + str(accuracy_score(df_tweet[objectiv_col], model.predict(tw
 print("AUC:" + str(roc_auc_score(df_tweet[objectiv_col], model.predict_proba(tweet_vectors)[:, 1])))
 
 # モデルを保存
-file_name = str(round(time.time())) + "_nn_model.pkl"
+file_name = tmp + "_nn_model.pkl"
 with open(os.path.join("model", file_name), mode='wb') as f:
-  pickle.dump(model, f, protocol=2)
+  joblib.dump(model, f, protocol=2)
