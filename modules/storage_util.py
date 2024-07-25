@@ -2,6 +2,7 @@ import os
 import firebase_admin
 from firebase_admin import storage
 import joblib
+from tempfile import TemporaryFile
 
 if (not len(firebase_admin._apps)):
   firebase_admin.initialize_app()
@@ -32,6 +33,11 @@ def open_file(file_name:str):
   else:
     # GCPからファイル取得
     blob = bucket.blob(file_name)
-    file = joblib.load(blob.download_as_string())
-  
+    with TemporaryFile() as temp_file:
+      #download blob into temp file
+      blob.download_to_file(temp_file)
+      temp_file.seek(0)
+      #load into joblib
+      file=joblib.load(temp_file)
+
   return file
