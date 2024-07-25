@@ -32,6 +32,6 @@ def open_file(file_name:str):
   else:
     # GCPからファイル取得
     blob = bucket.blob(file_name)
-    file = joblib.loads(blob.download_as_string())
+    file = joblib.load(blob.download_as_string())
   
   return file
