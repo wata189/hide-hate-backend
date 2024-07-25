@@ -40,11 +40,8 @@ def get_user(Authorization:str = Header()):
     "user": user
   }
 
-class CreateParams(BaseModel):
-  content: str
-  accept_may_hate: bool
-@app.post("/create", dependencies=[Depends(auth_util.JWTBearer())])
-def create(params: CreateParams, Authorization:str = Header()):
+@app.post("/post", dependencies=[Depends(auth_util.JWTBearer())])
+def post(params: model.PostParams, Authorization:str = Header()):
   # ヘイトチェック
   may_hate:bool = ai_util.may_hate_by_ai(params.content)
   timelines:list[model.Timeline] = []

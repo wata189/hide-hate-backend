@@ -69,10 +69,10 @@ def fetch_user(transaction: firestore.firestore.Transaction):
   return users
 
 
-class CreateParams(BaseModel):
+class PostParams(BaseModel):
   content: str
   accept_may_hate: bool
-def create_post(transaction:firestore.firestore.Transaction, params:CreateParams, may_hate:bool, authorization:str):
+def create_post(transaction:firestore.firestore.Transaction, params:PostParams, may_hate:bool, authorization:str):
   user:auth_util.UserResponse = auth_util.get_authenticated_user(transaction, authorization)
   userId = user["id"]
   doc = {
