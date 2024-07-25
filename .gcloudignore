@@ -85,7 +85,14 @@ model
 
 
 
-###############################################以下.gitignore独自項目###################################################################
-# requirements.txtはcloudfunctions本番pip installに必要なので
-# gcloudignoreには含めない
-requirements.txt
+##############################################gcloudignore独自##############################################
+batch
+document
+eda
+.gitignore
+firebase.json
+firestore.indexes.json
+firestore.rules
+package-lock.json
+package.json
+storage.rules

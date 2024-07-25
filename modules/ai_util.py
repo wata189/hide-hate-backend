@@ -3,9 +3,8 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.feature_extraction.text import CountVectorizer
 from modules import storage_util
-
-
 from janome.tokenizer import Tokenizer
+
 tokenizer = Tokenizer()
 def tokenize(text:str):
   return tokenizer.tokenize(text, wakati=True)

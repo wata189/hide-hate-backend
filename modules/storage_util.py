@@ -7,11 +7,12 @@ if (not len(firebase_admin._apps)):
   firebase_admin.initialize_app()
 
 ENV = os.environ.get("ENV")
-# 開発環境ではない場合はGCPに接続
-if(ENV != "development"):
+# 本番の場合はGCPに接続
+if(ENV == "production"):
   STORAGE_BUCKET_NAME = os.environ.get("STORAGE_BUCKET_NAME")
   bucket = storage.bucket(STORAGE_BUCKET_NAME)
-PATH_LOCAL_DATA = os.environ.get("PATH_LOCAL_DATA")
+else:
+  PATH_LOCAL_DATA = os.environ.get("PATH_LOCAL_DATA")
 
 def open_file(file_name:str):
   """

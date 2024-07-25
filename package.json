@@ -6,8 +6,14 @@
     "-------↓開発環境----": "",
     "ローカルCloudFunction": "npx env-cmd -f .env.dev functions-framework --target entry_point --debug",
     "ローカルfirebase": "firebase emulators:start --import=emulator_data --export-on-exit",
+    "-------デプロイ----": "",
+    "CloudFunctionsデプロイ": "npm-run-all beforeDeployCloudFunctions deployFunctions",
     "-------↓バッチ----": "",
-    "ローカルモデル作成": "npx env-cmd -f batch/.env.batch.dev python batch/create_model.py"
+    "ローカルモデル作成": "npx env-cmd -f batch/.env.batch.dev python batch/create_model.py",
+    "-------↓モジュール----": "",
+    "beforeDeployCloudFunctions": "pipenv requirements > requirements.txt && npm run setGcloudProject",
+    "setGcloudProject": "gcloud config set project hide-hate",
+    "deployFunctions": "gcloud functions deploy hide-hate --entry-point=entry_point --region=asia-northeast1 --runtime=python310 --memory=1GB --security-level=secure-always --env-vars-file=.env.prod.yaml --trigger-http --allow-unauthenticated"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",

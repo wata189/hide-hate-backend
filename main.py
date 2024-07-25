@@ -3,14 +3,13 @@ from agraffe import Agraffe
 from fastapi import Depends, FastAPI, Header
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from pydantic import BaseModel
 
 from modules import ai_util, firestore_util, auth_util, model
 
 ##################################設定###############################################
 @contextlib.asynccontextmanager
 async def lifespan(app):
-    yield {'message': 'hello'}
+  yield {'message': 'hello'}
 
 app = FastAPI(lifespan=lifespan)
 
